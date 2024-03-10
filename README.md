@@ -56,7 +56,11 @@ Fun fact: as of this writing, Monaco, Haiti, Togo, Guyana, Democratic Republic o
 
 If you somehow think this hacky little tool is worth your time to add some additional stats, I've tried to make that easy:
 
-1. Add a new stat-generating function. Use the existing ones as a template. You'll see they all have the same call signature and very similar structures. Please follow the same naming convention I've used, which is that the stat names have the general form <what they compute> + "by" or "per" + <what the stat is relative to>. If a stat is "by" something, then the something will be available as entries in the `options` parameter to your function.
+1. Add a new stat-generating function. Use the existing ones as a template. You'll see they all have the same call signature and very similar structures. Please follow the same naming convention I've used, which is that the stat names have the general form:
+```
+thing it computes + "by" or "per" + what the thing is relative to 
+```
+If a stat is "by" something, then users should be expected to provide some sort of parameter(s) to the computation, such as a year or a competition name or a WCA ID or whatever you want, really. Those parameters will be available to your function as elements of the `options` list passed to your function.
 2. Register a new short-name for your function in the `callTable` dictionary near the bottom of the script. 
 3. Add documentation for your new function to this file and to the `usage()` function.
 4. Submit a pull request.
