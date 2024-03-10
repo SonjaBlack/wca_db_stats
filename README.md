@@ -5,7 +5,7 @@ Python script to generate miscellaneous stats that were of interest to the autho
 # Usage:
 
 1. Have python 3.6 or later installed
-2. Download the latest [WCA database export](https://www.worldcubeassociation.org/export/results). Note, you must get the .tgz version of the database, not the .sql version
+2. Download the latest [WCA database export](https://www.worldcubeassociation.org/export/results). Note, you must get the .tsv version of the database, not the .sql version
 3. Unpack the database export into some convenient directory.
 4. Clone this repo to your computer, or just download the individual `wca_db_stats.py` file from here on Github.
 5. From your command line, invoke this script with the location of your database export, the name of one of the supported stats, and any other parameters required by that stat.
