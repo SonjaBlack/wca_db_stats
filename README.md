@@ -32,6 +32,12 @@ You provide the WCA ID of any comp, and it will generate for you a list of all t
 
 You provide a year, and it shows you a table of how many unique people competed in each event during that year, sorted by popularity. No surprise, 3x3 always comes out on top.
 
+## Event Popularity All Time
+
+`--stat epat`
+
+Same as Event Popularity by Year, but for all years together.
+
 ## Competitions Attended Histogram by Year
 
 `--stat cahby <year>`

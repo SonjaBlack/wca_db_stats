@@ -1,19 +1,22 @@
 # wca_db_stats.py -- crappy tool for pulling various status out of a
 # wca database export
 
+
 import argparse
 from collections import defaultdict
 import csv
 import re
 
+
 # event popularity by year: for each event, in the given year, show the number
 # of unique people who completed in that event and what percentage that is of the
-# total people who competed in that same year. 
+# total people who competed in that same year.
 def eventPopularityByYear(dump, options):
     targetFile = dump + "WCA_export_Results.tsv"
     year = options[0]
     competitorsYear = set()
     competitorsByEvent = defaultdict(lambda: set())
+
 
     with open(targetFile, "r", encoding="utf-8") as target:
         reader = csv.reader(target, delimiter='\t')
@@ -28,6 +31,7 @@ def eventPopularityByYear(dump, options):
             except:
                 pass
 
+
     numCompetitors = len(competitorsYear)
     print(f"Found {numCompetitors} total {year} competitors:")
     popularityList = []
@@ -38,12 +42,45 @@ def eventPopularityByYear(dump, options):
     for tup in popularityList:
         print(f"{tup[0]}\t{tup[1]}\t{tup[2]:.2%}")
 
+
+# Like the previous, but for all years.
+def eventPopularityAllTime(dump, options):
+    targetFile = dump + "WCA_export_Results.tsv"
+    competitorsByEvent = defaultdict(lambda: set())
+    allUniqueCompetitors = set()
+
+
+    with open(targetFile, "r", encoding="utf-8") as target:
+        reader = csv.reader(target, delimiter='\t')
+        _ = next(reader) # junk the header row
+        for row in reader:
+            try:
+                event = row[1]
+                person = row[7]
+                competitorsByEvent[event].add(person)
+                allUniqueCompetitors.add(person)
+            except:
+                pass
+
+
+    popularityList = []
+    numCompetitors = len(allUniqueCompetitors)  
+    print(f"Found {numCompetitors} unique competitors in WCA history.")
+    for event in competitorsByEvent:
+        popularityList.append( [event,len(competitorsByEvent[event]),len(competitorsByEvent[event])/numCompetitors] )
+    popularityList.sort(key=lambda t: t[2], reverse=True)
+    print("event\tcompetitors\tpercentage")
+    for tup in popularityList:
+        print(f"{tup[0]}\t{tup[1]}\t{tup[2]:.2%}")
+
+
 # This stat looks at the number of comps individual people attend in the given year.
 # That is, how many people only attended 1 comp all year? How many 2? 3? etc.
 def compsAttendedHistogramByYear(dump, options):
     targetFile = dump + "WCA_export_Results.tsv"
     year = options[0]
     competitorComps = defaultdict(lambda: set())
+
 
     # for every person, compile a set() of all comps they attended that year.
     with open(targetFile, "r", encoding="utf-8") as target:
@@ -54,6 +91,7 @@ def compsAttendedHistogramByYear(dump, options):
                 comp = row[0]
                 person = row[7]
                 competitorComps[person].add(comp)
+
 
     # boil those sets down to a histogram
     compsAttended = defaultdict(lambda: 0)
@@ -68,6 +106,7 @@ def compsAttendedHistogramByYear(dump, options):
     print("Num attended:\tPeople")
     for num in range(1,maxAttended+1):
         print(f"{num}\t{compsAttended[num]}")
+
 
 # for each event, find the first year in which it was held officially.
 def yearAddedPerEvent(dump, options):
@@ -91,6 +130,7 @@ def yearAddedPerEvent(dump, options):
     for t in yearlist:
         print(f"{t[0]}\t{t[1]}")
 
+
 # How many people represent each country, both by number and by percentage of total
 def peoplePerCountry(dump, options):
     targetFile = dump + "WCA_export_Persons.tsv"
@@ -111,11 +151,13 @@ def peoplePerCountry(dump, options):
     for c in countryList:
         print(f"{c[0]}\t{c[1]}\t{c[2]:.2%}")
 
+
 # For a given competition, get the list of people who were first-time competitors
 # at that comp.
 def firstTimeCompetitorsByComp(dump, options):
     targetFile = dump + "WCA_export_Results.tsv"
     compName = "".join(options) # this should work regardless of whether the user does or doesn't quote the comp name on the command line
+
 
     # First, make a set() of all people who were at that comp. That's one pass through targetFile.
     peopleAtTargetComp = set()
@@ -126,6 +168,7 @@ def firstTimeCompetitorsByComp(dump, options):
             if row[0] == compName:
                 peopleAtTargetComp.add(row[7])
 
+
     # Second, build and cache a table of comp IDs and their dates.
     compIDsDates = {}
     with open(dump+"WCA_export_Competitions.tsv", "r", encoding="utf-8") as allComps:
@@ -133,6 +176,7 @@ def firstTimeCompetitorsByComp(dump, options):
         _ = next(reader)
         for row in reader:
             compIDsDates[row[0]] = f"{row[16]}-{int(row[17]):02d}-{int(row[18]):02d}"
+
 
     # Third, go through targetFile again and for each record, if the record belongs
     # to one of our competitors, add a (CompID, date) tuple to a list for that person
@@ -145,7 +189,7 @@ def firstTimeCompetitorsByComp(dump, options):
                 tup = (row[0], compIDsDates[row[0]])
                 if tup not in personComps[row[7]]:
                     personComps[row[7]].append(tup)
-    
+   
     # For each person's list of tuples, sort by the date, and if compName is the
     # first one, then print the person's ID. Or if we're feeling friendly, make a nice table
     # of IDs, names, and how many comps they've been to since.
@@ -155,6 +199,7 @@ def firstTimeCompetitorsByComp(dump, options):
         compList.sort(key=lambda c: c[1])
         if compList[0][0] == compName:
             print(f"\t{id}, who has now been to {len(compList)} comps")
+
 
 def usage():
     print("""Usage:
@@ -177,8 +222,13 @@ First Time Competitors by Comp
 Event Popularity by Year
     name:   'epby'
     args:    A 4-digit year
-    purpose: Shows a table of WCA events, and how many unique people competed in each
+    purpose: Shows a table of WCA events and how many unique people competed in each
              one during the year you indicated.
+Event Popularity All Time
+    name:   'epat'
+    args:    None
+    purpose: Shows a table of WCA events and how many unique people have ever competed
+             in each one.
 Comps Attended Histogram By Year
     name:   'cahby'
     args:    A 4-digit year
@@ -194,14 +244,17 @@ People by Country (list of # of competitors representing each country)
     purpose: Shows a list of countries and how many competitors represent each one,
              both by number and percentage.""")
 
+
 # would prefer to use match/case, but can't count on everybody having python3.10 yet
 callTable = {
     'ftcbc': firstTimeCompetitorsByComp,
     'epby':  eventPopularityByYear,
+    'epat':  eventPopularityAllTime,
     'cahby': compsAttendedHistogramByYear,
     'yape':  yearAddedPerEvent,
     'ppc':   peoplePerCountry
 }
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -221,5 +274,5 @@ if __name__ == "__main__":
             statFunc = callTable[args.stat] # this might throw if user put in garbage
             statFunc(args.dump, options)    # call the indicated function
         except:
-            print(f"Error: unknown stat: {args.stat}\n")
-            usage()
+           print(f"Error: unknown stat: {args.stat}\n")
+           usage()
