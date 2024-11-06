@@ -56,7 +56,13 @@ Shows a simple table of what year each event was first held at competition recog
 
 Shows a simple table of how many people are registered to represent each country, both by the raw number and by percentage.
 
-Fun fact: as of this writing, Monaco, Haiti, Togo, Guyana, Democratic Republic of the Congo, Grenada, Somalia, Maldives, Fiji, Laos, Cameroon, and Saint Lucia are all represented by just one lonely cuber each. Time to hold some competitions in the Caribbean, I think!
+Fun fact: as of this writing, Monaco, Haiti, Togo, Guyana, Democratic Republic of the Congo, Grenada, Somalia, Maldives, Cameroon, Saint Lucia, San Marino, Antigua and Barbuda, and Mauritania are all represented by just one lonely cuber each. Time to hold some competitions in the Caribbean, I think!
+
+## Slowest Results by Event
+
+`--stat srbe <event>`
+
+Shows a listing of the 10 slowest individual solves in the database for a given event. The event must be specified as the WCA database identifier for the event, e.g. "333" for 3x3, "444bf" for 4x4 blindfolded, etc. Note that this program does not implement a 10-fastest solves per event, because the WCA website's [results page](https://www.worldcubeassociation.org/results/rankings/) already does that.
 
 # Contributions
 

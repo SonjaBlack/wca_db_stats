@@ -7,6 +7,19 @@ from collections import defaultdict
 import csv
 import re
 
+# helper routine to format results as mm:ss.xx
+def resultToTimeStr(result):
+    seconds = int(result/100)
+    centis = result % 100
+    if seconds > 59:
+        minutes = int(seconds/60)
+        seconds = seconds%60
+    else:
+        minutes = 0
+    if minutes == 0:
+        return f"{seconds}.{centis:02d}"
+    else:
+        return f"{minutes}:{seconds:02d}.{centis:02d}"
 
 # event popularity by year: for each event, in the given year, show the number
 # of unique people who completed in that event and what percentage that is of the
@@ -158,7 +171,6 @@ def firstTimeCompetitorsByComp(dump, options):
     targetFile = dump + "WCA_export_Results.tsv"
     compName = "".join(options) # this should work regardless of whether the user does or doesn't quote the comp name on the command line
 
-
     # First, make a set() of all people who were at that comp. That's one pass through targetFile.
     peopleAtTargetComp = set()
     with open(targetFile, "r", encoding="utf-8") as target:
@@ -168,7 +180,6 @@ def firstTimeCompetitorsByComp(dump, options):
             if row[0] == compName:
                 peopleAtTargetComp.add(row[7])
 
-
     # Second, build and cache a table of comp IDs and their dates.
     compIDsDates = {}
     with open(dump+"WCA_export_Competitions.tsv", "r", encoding="utf-8") as allComps:
@@ -176,7 +187,6 @@ def firstTimeCompetitorsByComp(dump, options):
         _ = next(reader)
         for row in reader:
             compIDsDates[row[0]] = f"{row[16]}-{int(row[17]):02d}-{int(row[18]):02d}"
-
 
     # Third, go through targetFile again and for each record, if the record belongs
     # to one of our competitors, add a (CompID, date) tuple to a list for that person
@@ -200,6 +210,37 @@ def firstTimeCompetitorsByComp(dump, options):
         if compList[0][0] == compName:
             print(f"\t{id}, who has now been to {len(compList)} comps")
 
+# For a given competition, get the list of people who were first-time competitors
+# at that comp.
+def slowestResultsByEvent(dump, options):
+    targetFile = dump + "WCA_export_Results.tsv"
+    targetEvent = options[0]
+    worstEver = 0
+    worstSolver = None
+    worstComp = None
+    tenWorst = []
+    fWorst = 0 # fastest worst times.
+
+    with open(targetFile, "r", encoding="utf-8") as target:
+        reader = csv.reader(target, delimiter="\t")
+        _ = next(reader)
+        for row in reader:
+            if row[1] == targetEvent:
+                personId = row[7]
+                formatId = row[8]
+                firstScoreCol = 9
+                numResults = 5 # excessive. There are always 5 results, though some may be zeroes for non-average rounds
+                slowest = max([ int(x) for x in row[firstScoreCol:firstScoreCol+numResults] ])
+                for result in [ int(x) for x in row[firstScoreCol:firstScoreCol+numResults] ]:
+                    if result >= fWorst: # then it could be one of the ten slowest
+                        tenWorst.append( (result, personId, row[0]) )
+                        tenWorst.sort(key=lambda t: t[0])
+                        if len(tenWorst) > 10: # if we've exceeded 10, toss the fastest one
+                            tenWorst = tenWorst[1:]
+                        fWorst = tenWorst[0][0] # and get the new fastest worst time.
+    print(f"The 10 slowest {targetEvent} results are:")
+    for tup in tenWorst:
+        print(f"  {resultToTimeStr(tup[0])} by {tup[1]} at {tup[2]}")
 
 def usage():
     print("""Usage:
@@ -238,11 +279,15 @@ Year Added Per Event (what year each event was first held in a WCA comp)
     name:   'yape'
     args:    None
     purpose: Shows a table of each WCA event and the first year it was held.
-People by Country (list of # of competitors representing each country)
+People by Country
     name:   'pbc'
     args:    None
     purpose: Shows a list of countries and how many competitors represent each one,
-             both by number and percentage.""")
+             both by number and percentage.
+Slowest Results by Event
+    name:    'srbe'
+    args:    an event id, like '333' or '333bf'
+    purpose: Shows a table of the slowest 10 results, with WCA ids, for a given event.""")
 
 
 # would prefer to use match/case, but can't count on everybody having python3.10 yet
@@ -252,7 +297,8 @@ callTable = {
     'epat':  eventPopularityAllTime,
     'cahby': compsAttendedHistogramByYear,
     'yape':  yearAddedPerEvent,
-    'ppc':   peoplePerCountry
+    'ppc':   peoplePerCountry,
+    'srbe':  slowestResultsByEvent
 }
 
 
@@ -270,9 +316,10 @@ if __name__ == "__main__":
             print("Error: missing --dump and/or --stat argument")
             usage()
             exit()
-        try:
+#        try:
+        if True:
             statFunc = callTable[args.stat] # this might throw if user put in garbage
             statFunc(args.dump, options)    # call the indicated function
-        except:
-           print(f"Error: unknown stat: {args.stat}\n")
-           usage()
+#        except:
+#           print(f"Error: unknown stat: {args.stat}\n")
+#           usage()
