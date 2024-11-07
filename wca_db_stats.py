@@ -316,10 +316,10 @@ if __name__ == "__main__":
             print("Error: missing --dump and/or --stat argument")
             usage()
             exit()
-#        try:
-        if True:
+        try:
             statFunc = callTable[args.stat] # this might throw if user put in garbage
             statFunc(args.dump, options)    # call the indicated function
-#        except:
-#           print(f"Error: unknown stat: {args.stat}\n")
-#           usage()
+        except:
+            print(f"Error: unknown stat code: {args.stat} Available stat codes:")
+            for key in callTable:
+                print(f"    {key}")
