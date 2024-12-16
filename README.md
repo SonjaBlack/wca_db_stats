@@ -64,6 +64,12 @@ Fun fact: as of this writing, Monaco, Haiti, Togo, Guyana, Democratic Republic o
 
 Shows a listing of the 10 slowest individual solves in the database for a given event. The event must be specified as the WCA database identifier for the event, e.g. "333" for 3x3, "444bf" for 4x4 blindfolded, etc. Note that this program does not implement a 10-fastest solves per event, because the WCA website's [results page](https://www.worldcubeassociation.org/results/rankings/) already does that.
 
+## Number of Competitors by Event
+
+`--stat ncbe`
+
+Shows a table of the number of unique competitor IDs for all WCA events, across the whole of the WCA database.
+
 # Contributions
 
 If you somehow think this hacky little tool is worth your time to add some additional stats, I've tried to make that easy:
