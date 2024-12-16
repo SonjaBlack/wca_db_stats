@@ -254,7 +254,7 @@ def numCompetitorsByEvent(dump, options):
             personId = row[7]
             eventCounts[event].add(personId)
 
-    print("Number of competitors for each event.")
+    print("Number of competitors for each event:")
     for event in eventCounts.keys():
         print(f"{event}: {len(eventCounts[event])}")
 
@@ -303,7 +303,11 @@ People by Country
 Slowest Results by Event
     name:    'srbe'
     args:    an event id, like '333' or '333bf'
-    purpose: Shows a table of the slowest 10 results, with WCA ids, for a given event.""")
+    purpose: Shows a table of the slowest 10 results, with WCA ids, for a given event.
+Number of Competitors by Event
+    name:   ncbe
+    args:   None
+    purpose: counts the number of unique competitor IDs for each event, across WCA history.""")
 
 
 # would prefer to use match/case, but can't count on everybody having python3.10 yet
@@ -333,10 +337,10 @@ if __name__ == "__main__":
             print("Error: missing --dump and/or --stat argument")
             usage()
             exit()
-#        try:
-        statFunc = callTable[args.stat] # this might throw if user put in garbage
-        statFunc(args.dump, options)    # call the indicated function
-        # except:
-        #     print(f"Error: unknown stat code: {args.stat} Available stat codes:")
-        #     for key in callTable:
-        #         print(f"    {key}")
+        try:
+            statFunc = callTable[args.stat] # this might throw if user put in garbage
+            statFunc(args.dump, options)    # call the indicated function
+        except:
+            print(f"Error: unknown stat code: {args.stat} Available stat codes:")
+            for key in callTable:
+                print(f"    {key}")
