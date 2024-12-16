@@ -242,6 +242,22 @@ def slowestResultsByEvent(dump, options):
     for tup in tenWorst:
         print(f"  {resultToTimeStr(tup[0])} by {tup[1]} at {tup[2]}")
 
+def numCompetitorsByEvent(dump, options):
+    targetFile = dump + "WCA_export_Results.tsv"
+    eventCounts = defaultdict(lambda: set())
+
+    with open(targetFile, "r", encoding="utf-8") as target:
+        reader = csv.reader(target, delimiter="\t")
+        _ = next(reader)
+        for row in reader:
+            event    = row[1]
+            personId = row[7]
+            eventCounts[event].add(personId)
+
+    print("Number of competitors for each event.")
+    for event in eventCounts.keys():
+        print(f"{event}: {len(eventCounts[event])}")
+
 def usage():
     print("""Usage:
     wca_db_stats.py --list
@@ -298,7 +314,8 @@ callTable = {
     'cahby': compsAttendedHistogramByYear,
     'yape':  yearAddedPerEvent,
     'ppc':   peoplePerCountry,
-    'srbe':  slowestResultsByEvent
+    'srbe':  slowestResultsByEvent,
+    'ncbe':  numCompetitorsByEvent
 }
 
 
@@ -316,10 +333,10 @@ if __name__ == "__main__":
             print("Error: missing --dump and/or --stat argument")
             usage()
             exit()
-        try:
-            statFunc = callTable[args.stat] # this might throw if user put in garbage
-            statFunc(args.dump, options)    # call the indicated function
-        except:
-            print(f"Error: unknown stat code: {args.stat} Available stat codes:")
-            for key in callTable:
-                print(f"    {key}")
+#        try:
+        statFunc = callTable[args.stat] # this might throw if user put in garbage
+        statFunc(args.dump, options)    # call the indicated function
+        # except:
+        #     print(f"Error: unknown stat code: {args.stat} Available stat codes:")
+        #     for key in callTable:
+        #         print(f"    {key}")
